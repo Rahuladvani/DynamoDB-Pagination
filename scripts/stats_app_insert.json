@@ -1,0 +1,29 @@
+{
+  "pk": {
+    "S": "<pk>"
+  },
+  "sk": {
+    "S": "<sk>"
+  },
+  "first_name": {
+    "S": "<name>"
+  },
+  "last_name": {
+    "S": "<name>"
+  },
+  "national_team": {
+    "S": "<national_team>"
+  },
+  "country": {
+    "S": "<country>"
+  },
+  "goals": {
+    "N": "<>"
+  },
+  "assists": {
+    "N": "<>"
+  },
+  "appearances": {
+    "N": "<>"
+  }
+}
