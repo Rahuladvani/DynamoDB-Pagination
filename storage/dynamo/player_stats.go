@@ -28,9 +28,9 @@ type playerStats struct {
 type StatsRecord struct {
 	PartitionKey string `dynamodbav:"pk"`    // generic name, expected value is country
 	SortKey      string `dynamodbav:"sk"`    // generic name, expected value is <NationalTeam>#<FirstName>#<LastName>
-	Goals        string `dynamodbav:"goals"` // Also, sort key attribute for the gsi
-	Assists      string `dynamodbav:"assists"`
-	Appearances  string `dynamodbav:"appearances"`
+	Goals        int    `dynamodbav:"goals"` // sort key attribute for the gsi
+	Assists      int    `dynamodbav:"assists"`
+	Appearances  int    `dynamodbav:"appearances"`
 	Country      string `dynamodbav:"country"`
 	NationalTeam string `dynamodbav:"national_team"`
 	FirstName    string `dynamodbav:"first_name"`
@@ -94,6 +94,23 @@ func (p *playerStats) buildSortKey(nationalTeam string, firstName string, lastNa
 	return fmt.Sprintf("%s%s%s%s%s", nationalTeam, identifierSeparator, firstName, identifierSeparator, lastName)
 }
 
+func (p *playerStats) ScanStatsTable(ctx context.Context, cursor *Cursor) ([]*StatsRecord, error) {
+	var records []*StatsRecord
+	scanTableInput := &dynamodb.ScanInput{
+		TableName: aws.String(playerStatsTable),
+		Limit:     aws.Int32(cursor.PageLimit),
+	}
+	resp, err := p.dbClient.Scan(ctx, scanTableInput)
+	if err != nil {
+		return nil, err
+	}
+	err = attributevalue.UnmarshalListOfMaps(resp.Items, &records)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
 func (p *playerStats) GetPlayerStats(ctx context.Context, country string, nationalTeam string, firstName string, lastName string) (*StatsRecord, error) {
 	var playerRecord *StatsRecord
 	resp, err := p.dbClient.GetItem(ctx, &dynamodb.GetItemInput{
@@ -111,6 +128,22 @@ func (p *playerStats) GetPlayerStats(ctx context.Context, country string, nation
 		return nil, err
 	}
 	return playerRecord, nil
+}
+
+func (p *playerStats) PutPlayerStats(ctx context.Context, playerRecord *StatsRecord) error {
+	av, err := attributevalue.MarshalMap(playerRecord)
+	if err != nil {
+		return err
+	}
+	putItemInput := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String(playerStatsTable),
+	}
+	_, err = p.dbClient.PutItem(ctx, putItemInput)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *playerStats) ListPlayers(ctx context.Context, country string, nationalTeam string) ([]*StatsRecord, error) {

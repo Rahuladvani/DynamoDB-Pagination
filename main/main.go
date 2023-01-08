@@ -37,7 +37,6 @@ func main() {
 	})
 
 	if err != nil {
-		//panic(err)
 		os.Exit(1)
 	}
 
@@ -46,6 +45,8 @@ func main() {
 	})
 	storage := dynamo.New(svc)
 	stats := statsHandler{storageClient: storage}
+
+	stats.insertSeedData()
 
 	fmt.Println("getting single player stats")
 	stats.GetPlayerStats()
@@ -59,6 +60,29 @@ func main() {
 	stats.ListPlayersByGoalsThreshold()
 	fmt.Println("listing limited number player stats with goals filter in descending order wrt goals scored")
 	stats.ListPlayersByGoalsThresholdSorted()
+}
+
+func (s *statsHandler) insertSeedData() {
+	cursor := &dynamo.Cursor{PageLimit: 1, ScanIndexForward: true}
+	resp, err := s.storageClient.ScanStatsTable(context.TODO(), cursor)
+	if err != nil {
+		fmt.Println("failed to scan stats table", err)
+		os.Exit(1)
+	}
+	if len(resp) != 0 {
+		fmt.Println("not inserting seed data as stats table already contains items")
+		return
+	}
+
+	records := loadSeedDataInMemory()
+	for _, record := range records {
+		err := s.storageClient.PutPlayerStats(context.TODO(), &record)
+		if err != nil {
+			fmt.Println("failed to insert seed data into stats table", err)
+			os.Exit(1)
+		}
+	}
+	fmt.Println("loaded stats table with seed info")
 }
 
 func (s *statsHandler) ListPlayersWithoutPagination() {
@@ -161,13 +185,5 @@ func (s *statsHandler) GetPlayerStats() {
 	if resp != nil {
 		dbOp = *resp
 		fmt.Println(dbOp)
-	}
-}
-
-func printRecords(records []*dynamo.StatsRecord) {
-	for _, record := range records {
-		if record != nil {
-			fmt.Printf("%+v\n", *record)
-		}
 	}
 }

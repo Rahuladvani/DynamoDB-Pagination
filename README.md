@@ -1,13 +1,26 @@
-This is a example application to implement different forms of pagination in DynamoDB. In-depth explanation of the storage layer of this repository can be found in <>. 
+## DynamoDB Pagination
 
-To run this project DynamoDB needs to be installed locally and run on port `8000`.
+This is an example project that implements various forms of pagination in DynamoDB using Go. A detailed explanation about the various types of pagination and their corresponding implementations in the storage layer of this repository can be found in the article,  [Pagination in DynamoDB: Tips, Tricks and Good Practices](). 
 
-For local installation of DynamoDB follow - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html
+To run this project DynamoDB needs to be installed locally
 
-To visualize data in DynamoDB and manage tables download NoSQL Workbench - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
+For local installation of DynamoDB follow [AWS DDB Local Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html)
 
-For creating the stats table and global index, run `sh scripts/soccer_app_create_table.sh`. The script also inserts a sample record/item in the table based on the JSON defined under `scripts/stats_app_insert.json`
+To visualize data in DynamoDB and manage tables download NoSQL Workbench via [NoSQL Workbench Setup](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html)
 
-Once DynamoDB is installed locally, and the stats table is created, run the project using
+### Steps to run the project
 
-`go run main.go`
+* Run DynamoDB locally on port `8000`
+
+* Create the stats table and global index with `sh scripts/soccer_app_create_table.sh`
+
+* Once DynamoDB is installed locally, and the stats table is created, run the project using
+  `go run main/main.go`
+
+If the stats table is empty, running the project adds some seed data to the table, which looks something like this
+
+<img src="img.png" width="600" height="200" />
+
+To add additional rows in the table define the input in JSON format under `scripts/stats_app_insert.json` and run the command
+
+`aws dynamodb put-item --table-name player_stats_v1 --item file://stats_app_insert.json --region us-east-1 --endpoint-url http://localhost:8000`

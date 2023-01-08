@@ -29,7 +29,7 @@ aws dynamodb update-table \
 aws dynamodb list-tables --region us-east-1 --endpoint-url http://localhost:8000
 
 # For inserting data into the table
-aws dynamodb put-item --table-name player_stats_v1 --item file://stats_app_insert.json --region us-east-1 --endpoint-url http://localhost:8000
+# aws dynamodb put-item --table-name player_stats_v1 --item file://stats_app_insert.json --region us-east-1 --endpoint-url http://localhost:8000
 
 # For cleanup
 # aws dynamodb delete-table --table-name player_stats_v1 --region us-east-1 --endpoint-url http://localhost:8000
