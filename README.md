@@ -1,6 +1,6 @@
 ## DynamoDB Pagination
 
-This is an example project that implements various forms of pagination in DynamoDB using Go. A detailed explanation about the various types of pagination and their corresponding implementations in the storage layer of this repository can be found in the article,  [Pagination in DynamoDB: Tips, Tricks and Good Practices](). 
+This is an example project that implements various forms of pagination in DynamoDB using Go. A detailed explanation about the various types of pagination and their corresponding implementations in the storage layer of this repository can be found in this Medium article  [Pagination in DynamoDB: Tips, Tricks and Good Practices](https://medium.com/@rahul.advani07/pagination-in-dynamodb-tips-tricks-and-good-practices-3c40edd479b0).
 
 To run this project DynamoDB needs to be installed locally
 
@@ -11,11 +11,9 @@ To visualize data in DynamoDB and manage tables download NoSQL Workbench via [No
 ### Steps to run the project
 
 * Run DynamoDB locally on port `8000`
-
 * Create the stats table and global index with `sh scripts/soccer_app_create_table.sh`
-
-* Once DynamoDB is installed locally, and the stats table is created, run the project using
-  `go run main/main.go`
+* Build binary using `cd main/ && go build -o paginationexec`
+* Execute binary `./paginationexec`
 
 If the stats table is empty, running the project adds some seed data to the table, which looks something like this
 

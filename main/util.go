@@ -5,7 +5,7 @@ import (
 	"pagination/storage/dynamo"
 )
 
-func printRecords(records []*dynamo.StatsRecord) {
+func PrintRecords(records []*dynamo.StatsRecord) {
 	for _, record := range records {
 		if record != nil {
 			fmt.Printf("%+v\n", *record)
@@ -13,7 +13,7 @@ func printRecords(records []*dynamo.StatsRecord) {
 	}
 }
 
-func loadSeedDataInMemory() []dynamo.StatsRecord {
+func LoadSeedDataInMemory() []dynamo.StatsRecord {
 	seedRecords := []dynamo.StatsRecord{
 		{
 			PartitionKey: "Portugal",

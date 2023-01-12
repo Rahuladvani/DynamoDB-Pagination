@@ -21,12 +21,12 @@ const (
 	DynamoLocalUrl          = "http://localhost:8000"
 	menNationalTeam         = "MNT"
 	womenNationalTeam       = "WNT"
-	testPlayerFirstName     = "first-name-1"
-	testPlayerLastName      = "last-name-1"
-	testPlayerCountry1      = "country-1"
-	testPlayerCountry2      = "country-2"
-	userEnforcedRecordLimit = 4
-	goalThreshold           = 10
+	testPlayerFirstName     = "Cristiano"
+	testPlayerLastName      = "Ronaldo"
+	testPlayerCountry1      = "Portugal"
+	testPlayerCountry2      = "USA"
+	userEnforcedRecordLimit = 1
+	goalThreshold           = 100
 )
 
 func main() {
@@ -74,7 +74,7 @@ func (s *statsHandler) insertSeedData() {
 		return
 	}
 
-	records := loadSeedDataInMemory()
+	records := LoadSeedDataInMemory()
 	for _, record := range records {
 		err := s.storageClient.PutPlayerStats(context.TODO(), &record)
 		if err != nil {
@@ -86,12 +86,12 @@ func (s *statsHandler) insertSeedData() {
 }
 
 func (s *statsHandler) ListPlayersWithoutPagination() {
-	resp, err := s.storageClient.ListPlayers(context.TODO(), testPlayerCountry1, menNationalTeam)
+	resp, err := s.storageClient.ListPlayers(context.TODO(), testPlayerCountry2, womenNationalTeam)
 	if err != nil {
 		fmt.Println("failed while listing player stats without pagination support : ", err)
 		os.Exit(1)
 	} else {
-		printRecords(resp)
+		PrintRecords(resp)
 	}
 }
 
@@ -101,7 +101,7 @@ func (s *statsHandler) ListAllPlayers() {
 		fmt.Println("failed while listing player stats with pagination support : ", err)
 		os.Exit(1)
 	} else {
-		printRecords(resp)
+		PrintRecords(resp)
 	}
 }
 
@@ -121,8 +121,10 @@ func (s *statsHandler) ListLimitedPlayers() {
 			fmt.Println("failed while listing limit specified number of player stats : ", err)
 			os.Exit(1)
 		} else {
-			fmt.Println("Page Number : ", pageCount)
-			printRecords(resp)
+			if len(resp) != 0 {
+				fmt.Println("Page Number : ", pageCount)
+				PrintRecords(resp)
+			}
 		}
 		isFirstPage = false
 	}
@@ -139,13 +141,15 @@ func (s *statsHandler) ListPlayersByGoalsThreshold() {
 			break
 		}
 		pageCount += 1
-		resp, err := s.storageClient.ListPlayersByGoalsThreshold(context.TODO(), testPlayerCountry1, menNationalTeam, goalThreshold, cursor)
+		resp, err := s.storageClient.ListPlayersByGoalsThreshold(context.TODO(), testPlayerCountry2, womenNationalTeam, goalThreshold, cursor)
 		if err != nil {
 			fmt.Println("failed while listing limit specified number of player stats with goals filter : ", err)
 			os.Exit(1)
 		} else {
-			fmt.Println("Page Number : ", pageCount)
-			printRecords(resp)
+			if len(resp) != 0 {
+				fmt.Println("Page Number : ", pageCount)
+				PrintRecords(resp)
+			}
 		}
 		isFirstPage = false
 	}
@@ -155,7 +159,7 @@ func (s *statsHandler) ListPlayersByGoalsThresholdSorted() {
 	// ScanIndexForward = false for top scorers in descending order
 	cursor := &dynamo.Cursor{PageLimit: 1, ScanIndexForward: false}
 	pageCount := 0
-
+	reducedGoalThreshold := goalThreshold - 50
 	// Iterating over the result pages
 	isFirstPage := true
 	for {
@@ -163,27 +167,27 @@ func (s *statsHandler) ListPlayersByGoalsThresholdSorted() {
 			break
 		}
 		pageCount += 1
-		resp, err := s.storageClient.ListPlayersByGoalsThresholdSorted(context.TODO(), testPlayerCountry2, womenNationalTeam, goalThreshold, cursor)
+		resp, err := s.storageClient.ListPlayersByGoalsThresholdSorted(context.TODO(), testPlayerCountry2, womenNationalTeam, reducedGoalThreshold, cursor)
 		if err != nil {
 			fmt.Println("failed while listing limit specified number of player stats with goals filter in sorted order : ", err)
 			os.Exit(1)
 		} else {
-			fmt.Println("Page Number : ", pageCount)
-			printRecords(resp)
+			if len(resp) != 0 {
+				fmt.Println("Page Number : ", pageCount)
+				PrintRecords(resp)
+			}
 		}
 		isFirstPage = false
 	}
 }
 
 func (s *statsHandler) GetPlayerStats() {
-	var dbOp dynamo.StatsRecord
 	resp, err := s.storageClient.GetPlayerStats(context.TODO(), testPlayerCountry1, menNationalTeam, testPlayerFirstName, testPlayerLastName)
 	if err != nil {
 		fmt.Println("failed while fetching player stats : ", err)
 		os.Exit(1)
 	}
 	if resp != nil {
-		dbOp = *resp
-		fmt.Println(dbOp)
+		fmt.Printf("%+v\n", *resp)
 	}
 }
